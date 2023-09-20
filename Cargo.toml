@@ -16,6 +16,8 @@ authors = ["Doug Anderson <DougAnderson444@peerpiper.io>"]
 bls12_381_plus = "0.8.5"
 hkdf = "0.12.3"
 sha2 = "0.10.7"
+thiserror = "1.0.48"
+secrecy = { version = "0.8.0" }
 
 [dev-dependencies]
 hex = "0.4.3"

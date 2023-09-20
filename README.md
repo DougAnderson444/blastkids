@@ -1,4 +1,6 @@
-# Blastkids
+# Blastkids 🚀🔑🔑🔑
+
+[![GitHub Workflow Status](https://img.shields.io/github/workflow/status/DougAnderson444/blastkids/Rust)](
 
 [![Build Status](https://travis-ci.com/DougAnderson444/blastkids.svg?branch=master)](https://travis-ci.com/DougAnderson444/blastkids)
 [![codecov](https://codecov.io/gh/DougAnderson444/blastkids/branch/master/graph/badge.svg)](https://codecov.io/gh/DougAnderson444/blastkids)
@@ -26,6 +28,31 @@ cargo install blastkids
 See documentation on [docs.rs](https://docs.rs/blastkids).
 
 See tests in [`lib.rs`](./src/lib.rs) for example usage.
+
+```rust
+use blastkids::{Manager, Seed, derive};
+use blastkids::{G1, G2};
+
+// make a new manager for a G2 public key
+let seed = Seed::new([42u8; 32]);
+let manager: Manager<G2> = Manager::from_seed(seed);
+
+// With a Manager you can create as many account sas you need
+let account_number = 1u32;
+let account = manager.account(account_number);
+
+let length = 8u8; // Specify how many Child Public Keys you need (in this case, 8). Can be up to 255.
+
+// Anyone can use an Account Public Key and a `length` to derive a child account
+let child_account: Vec<G2> = derive(&account.pk, length);
+
+// When you want to use the child account secret keys,
+// you call `sized` on the account
+let child = account.sized(length);
+
+// This child public keys are the same as the ones derived above
+assert_eq!(child.pk, child_account);
+```
 
 ## Tests
 
