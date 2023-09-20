@@ -8,7 +8,7 @@ homepage = "https://github.com/DougAnderson444/blastkids"
 documentation = "https://docs.rs/blastkids"
 repository = "https://github.com/DougAnderson444/blastkids"
 readme = "README.md"
-keywords = ["bls12-381", "bls", "bls12", "bls derive", "bls derivation"]
+keywords = ["bls12-381", "derive", "derivation"]
 categories = ["cryptography"]
 authors = ["Doug Anderson <DougAnderson444@peerpiper.io>"]
 
