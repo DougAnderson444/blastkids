@@ -47,3 +47,15 @@ Uses:
 - [EIP-2333](https://eips.ethereum.org/EIPS/eip-2333)
 - [EIP-2334](https://eips.ethereum.org/EIPS/eip-2334)
 - [rust-bls-derivation](https://github.com/taiyi-research-institute/rust-bls-derivation) (circa 2023, uses [`curv-kzen`](https://crates.io/crates/curv-kzen) library which breaks with rust-nightly and appears somewhat unmaintained)
+
+## Contributing
+
+Contributions are welcome! Please open an issue if you have any feature ideas or find any bugs. I also accept pull requests with open arms. Please:
+
+1. Fork this repo
+2. Create a new branch for your changes
+3. Open a draft pull request so we can follow and collaborate on your changes
+4. Add tests for your changes
+5. Keep the diff minimal for each pull request
+6. Write meaningful commit messages
+7. Change Draft to Open when you're ready for final review
