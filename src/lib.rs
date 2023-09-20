@@ -1,21 +1,20 @@
-use sha2::{Digest, Sha256};
-// bring Field trait into scope so we can use is_zero()
-use bls12_381_plus::ff::Field;
 // use bigint::prelude::*;
 use bls12_381_plus::elliptic_curve::{
     bigint::{
         self,
         consts::{U48, U96},
         generic_array::{typenum::Unsigned, ArrayLength, GenericArray},
-        prelude::{ArrayEncoding, Encoding},
+        prelude::Encoding,
     },
     ops::MulByGenerator,
 };
+use bls12_381_plus::ff::Field; // so we can use is_zero()
 use bls12_381_plus::group::{Curve, Group};
 use bls12_381_plus::G1Projective as GE1;
 use bls12_381_plus::G2Projective as GE2;
 use bls12_381_plus::Scalar;
 use hkdf::Hkdf;
+use sha2::{Digest, Sha256};
 use std::convert::*;
 
 pub type BigInt = bigint::U384;
@@ -170,8 +169,8 @@ where
     let binding = parent_pk.serialize_compressed();
     let ikm = binding.as_slice();
     let combined = [ikm, &salt[..]].concat();
-    let digest = &hex::encode(Sha256::digest(combined));
-    let big_digest = bigint::U256::from_be_hex(digest);
+    let digest = Sha256::digest(combined);
+    let big_digest = bigint::U256::from_be_bytes(digest.into());
     Scalar::from_raw(big_digest.into()) //
 }
 
@@ -296,6 +295,11 @@ mod test {
 
         let derived_master_pk = GE2::mul_by_generator(&derived_master_sk);
         let derived_child_sk = ckd_sk_normal::<GE2>(&derived_master_sk, 42u32);
+        assert_eq!(
+            derived_child_sk,
+            Scalar::from_be_hex("23cf2492eb784e5e01015731deb8de292e0766d3b688f3ad6e31bc73ddde2f38")
+                .unwrap()
+        );
         println!(
             "derived_child_sk [{}] {:?}",
             derived_child_sk.to_be_bytes().len(),

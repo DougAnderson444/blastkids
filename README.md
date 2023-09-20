@@ -11,7 +11,7 @@ A BLS12-381 child key derivation library written in Rust. Implements EIP-2333 an
 
 ## Rationale
 
-If you want to use Delegatable Anonymous Credentials the verification key (VK) becomes long. Since a VK is simply several BLS12-381 public keys (PKs) we can use a derivation algorithm such as EIP-2333 in order to derive the long VK from a single root PK given any length:written.
+If you want to use Delegatable Anonymous Credentials the verification key (`VK`) becomes as long as the credential entries. Since a `VK` is simply several BLS12-381 public keys (`PK`s) we can use a derivation algorithm such as EIP-2333 in order to derive the long `VK` from a single root `PK` given any length.
 
 ## Installation
 
@@ -21,7 +21,7 @@ cargo install blastkids
 
 ## API
 
-See tests in [`/lib.rs`] for examples.
+See tests in [`lib.rs`](./src/lib.rs) for examples.
 
 ## Tests
 

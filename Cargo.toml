@@ -3,11 +3,10 @@ name = "blastkids"
 version = "0.1.0"
 edition = "2021"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
 [dependencies]
-crypto-bigint = "0.5.3"
 bls12_381_plus = "0.8.5"
-hex = "0.3.1"
 hkdf = "0.12.3"
 sha2 = "0.10.7"
+
+[dev-dependencies]
+hex = "0.4.3"
