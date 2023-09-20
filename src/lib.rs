@@ -21,11 +21,13 @@ pub struct ReadmeDoctests;
 
 /// Seed and master key Manager.
 ///
-/// Generic over the type of curve used, either G1 or G2
+/// Generic over the type of curve used, [either G1 or G2](https://hackmd.io/@benjaminion/bls12-381#Swapping-G1-and-G2)
 ///
 /// ```rust
 /// use blastkids::{Manager, Seed};
-/// use blastkids::{G1, G2};
+/// use bls12_381_plus::G1Projective as G1;
+/// use bls12_381_plus::G2Projective as G2;
+/// // use blastkids::{G1, G2}; <== re-exported for convenience
 ///
 /// // a G1 public key
 /// let seed = Seed::new([69u8; 32]);
