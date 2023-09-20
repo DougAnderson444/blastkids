@@ -42,6 +42,8 @@ pub struct Manager<T: BLSCurve> {
 }
 
 impl<T: BLSCurve + MulByGenerator + Group<Scalar = Scalar>> Manager<T> {
+    /// Create a new Manager from a master secret key
+    /// and derive the master public key from it.
     fn new(master_sk: Scalar) -> Self {
         let master_pk: T = T::mul_by_generator(&master_sk);
         Self {
@@ -50,6 +52,7 @@ impl<T: BLSCurve + MulByGenerator + Group<Scalar = Scalar>> Manager<T> {
         }
     }
 
+    /// Create a new Manager from a seed
     pub fn from_seed(seed: Seed) -> Self {
         let master_sk: Scalar =
             kdf::derive_master_sk(&seed.into_inner()).expect("Seed has length of 32 bytes");
@@ -60,7 +63,7 @@ impl<T: BLSCurve + MulByGenerator + Group<Scalar = Scalar>> Manager<T> {
     ///
     /// Uses the master secret key to create a hardened account key,
     /// then [Account] uses this hardened account key to create a derived
-    /// non-hardened sub-account keys.
+    /// non-hardened sub-account (child) keys.
     ///
     /// This way the user can create new accounts for the same seed
     /// and also rotate them in the event of compromise without
@@ -79,6 +82,9 @@ impl<T: BLSCurve + MulByGenerator + Group<Scalar = Scalar>> Manager<T> {
     }
 }
 
+/// An Account is a hardened key derived from the master secret key.
+///
+/// It is generic over the type of curve used, either G1 or G2.
 pub struct Account<T: BLSCurve + MulByGenerator + Group<Scalar = Scalar>> {
     pub index: u32,
     sk: Secret<Scalar>,
@@ -86,7 +92,7 @@ pub struct Account<T: BLSCurve + MulByGenerator + Group<Scalar = Scalar>> {
 }
 
 impl<T: BLSCurve + MulByGenerator + Group<Scalar = Scalar>> Account<T> {
-    /// Create a new account
+    /// Create a new account from a secret key and public key
     pub fn new(index: u32, sk: Scalar, pk: T) -> Self {
         Self {
             index,
