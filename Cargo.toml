@@ -2,6 +2,15 @@
 name = "blastkids"
 version = "0.1.0"
 edition = "2021"
+license = "MIT"
+description = "Derive BLS12-381 child keys using Blastkids."
+homepage = "https://github.com/DougAnderson444/blastkids"
+documentation = "https://docs.rs/blastkids"
+repository = "https://github.com/DougAnderson444/blastkids"
+readme = "README.md"
+keywords = ["bls12-381", "bls", "bls12", "bls derive", "bls derivation"]
+categories = ["cryptography"]
+authors = ["Doug Anderson <DougAnderson444@peerpiper.io>"]
 
 [dependencies]
 bls12_381_plus = "0.8.5"
