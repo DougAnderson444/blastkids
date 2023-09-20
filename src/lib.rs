@@ -25,10 +25,13 @@ const DIGEST_SIZE: usize = 32;
 const NUM_DIGESTS: usize = 255;
 const OUTPUT_SIZE: usize = DIGEST_SIZE * NUM_DIGESTS;
 
+/// Trait for serializing a point to compressed form
 pub trait BLSCurve {
     type CompressedPointLength: ArrayLength<u8> + Unsigned;
     fn serialize_compressed(&self) -> GenericArray<u8, Self::CompressedPointLength>;
 }
+
+/// Implement BLSCurve for GE1
 impl BLSCurve for GE1 {
     // length is 48
     type CompressedPointLength = U48;
@@ -36,6 +39,8 @@ impl BLSCurve for GE1 {
         self.to_affine().to_compressed().into()
     }
 }
+
+/// Implement BLSCurve for GE2
 impl BLSCurve for GE2 {
     type CompressedPointLength = U96;
     fn serialize_compressed(&self) -> GenericArray<u8, Self::CompressedPointLength> {
@@ -46,7 +51,6 @@ impl BLSCurve for GE2 {
         ret
     }
 }
-// impl BLSCurve for ECScalar {}
 
 /// Derive master private key from a seed
 pub fn derive_master_sk(seed: &[u8]) -> Result<Scalar, String> {
