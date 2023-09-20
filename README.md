@@ -7,7 +7,9 @@
 [![dependency status](https://deps.rs/repo/github/DougAnderson444/blastkids/status.svg)](https://deps.rs/repo/github/DougAnderson444/blastkids)
 [![MIT licensed](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
 
-A BLS12-381 child key derivation library written in Rust. Implements EIP-2333 and EIP-2334. Fork of [rust-bls-derivation](https://github.com/taiyi-research-institute/rust-bls-derivation) using [`bls12_381_plus`](https://github.com/mikelodder7/bls12_381_plus) instead of [`curv-kzen`](https://crates.io/crates/curv-kzen)
+A BLS12-381 child key derivation library written in Rust. Implements EIP-2333 and EIP-2334.
+
+Fork of [rust-bls-derivation](https://github.com/taiyi-research-institute/rust-bls-derivation) using [`bls12_381_plus`](https://github.com/mikelodder7/bls12_381_plus) instead of [`curv-kzen`](https://crates.io/crates/curv-kzen), plus cleanup and documentation.
 
 ## Rationale
 
@@ -19,9 +21,11 @@ If you want to use Delegatable Anonymous Credentials the verification key (`VK`)
 cargo install blastkids
 ```
 
-## API
+## API & Docs
 
-See tests in [`lib.rs`](./src/lib.rs) for examples.
+See documentation on [docs.rs](https://docs.rs/blastkids).
+
+See tests in [`lib.rs`](./src/lib.rs) for example usage.
 
 ## Tests
 
@@ -31,16 +35,14 @@ cargo test
 
 ## Dependencies
 
-Uses:
-
 - BLS12-381: [bls12_381_plus](https://crates.io/crates/bls12_381_plus)
 - Elliptic Curve: [RustCrypto/elliptic-curves](https://crates.io/crates/elliptic-curve)
 - Big Integers: [RustCrypto/ctypro-bigint](https://crates.io/crates/crypto-bigint)
 
 ## See also
 
-- Generate seeds using password + salt: [seed-keeper-core](https://github.com/DougAnderson444/seed-keeper)
-- Generate Credentials using a seed: [delanocreds](https://github.com/DougAnderson444/delanocreds)
+- Generate seeds using `password` + `salt`: [seed-keeper-core](https://github.com/DougAnderson444/seed-keeper)
+- Generate Credentials using a `seed`: [delanocreds](https://github.com/DougAnderson444/delanocreds)
 
 ## Prior Work
 

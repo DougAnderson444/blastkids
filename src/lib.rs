@@ -1,3 +1,5 @@
+#![doc = include_str!("../README.md")]
+
 // use bigint::prelude::*;
 use bls12_381_plus::elliptic_curve::{
     bigint::{
@@ -80,7 +82,7 @@ fn hkdf(salt: &[u8], ikm: &[u8], info: &[u8], okm: &mut [u8]) {
         .expect("48 is a valid length for Sha256 to output");
 }
 
-/// private -> private hardened child key derivation
+/// Private -> Private hardened child key derivation
 pub fn ckd_sk_hardened(parent_sk: &Scalar, index: u32) -> Scalar {
     let lamp_pk = parent_sk_to_lamport_pk(parent_sk, index);
     hkdf_mod_r(lamp_pk.as_ref(), b"")
@@ -150,7 +152,7 @@ pub fn path_to_node(path_str: &str) -> Result<Vec<u32>, String> {
     Ok(ret)
 }
 
-/// Private -> private non-hardened child key derivation
+/// Private -> Private non-hardened child key derivation
 pub fn ckd_sk_normal<T>(parent_sk: &Scalar, index: u32) -> Scalar
 where
     T: BLSCurve + Group<Scalar = Scalar> + MulByGenerator,
@@ -174,7 +176,7 @@ where
     Scalar::from_raw(big_digest.into()) //
 }
 
-/// public->public non-hardened child key derivation
+/// Public -> Public non-hardened child key derivation
 pub fn ckd_pk_normal<T: BLSCurve + Group<Scalar = Scalar> + MulByGenerator + Copy>(
     parent_pk: &T,
     index: u32,
@@ -183,7 +185,7 @@ pub fn ckd_pk_normal<T: BLSCurve + Group<Scalar = Scalar> + MulByGenerator + Cop
     parent_pk.add(&T::mul_by_generator(&tweak_sk))
 }
 
-/// private->private non-hardened child key derivation from a path
+/// Private -> Private non-hardened child key derivation from a path
 pub fn derive_child_sk_normal<T: BLSCurve + Group<Scalar = Scalar> + MulByGenerator>(
     parent_sk: Scalar,
     path_str: &str,
@@ -196,7 +198,7 @@ pub fn derive_child_sk_normal<T: BLSCurve + Group<Scalar = Scalar> + MulByGenera
     child_sk
 }
 
-/// public->public non-hardened child key derivation from a path
+/// Public -> Public non-hardened child key derivation from a path
 pub fn derive_child_pk_normal<T: BLSCurve + Group<Scalar = Scalar> + MulByGenerator + Copy>(
     parent_pk: T,
     path_str: &str,
