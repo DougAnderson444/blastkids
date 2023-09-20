@@ -1,7 +1,5 @@
 # Blastkids 🚀🔑🔑🔑
 
-[![GitHub Workflow Status](https://img.shields.io/github/workflow/status/DougAnderson444/blastkids/Rust)](
-
 [![Build Status](https://travis-ci.com/DougAnderson444/blastkids.svg?branch=master)](https://travis-ci.com/DougAnderson444/blastkids)
 [![codecov](https://codecov.io/gh/DougAnderson444/blastkids/branch/master/graph/badge.svg)](https://codecov.io/gh/DougAnderson444/blastkids)
 [![Crates.io](https://img.shields.io/crates/v/blastkids.svg)](https://crates.io/crates/blastkids)
