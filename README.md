@@ -1,7 +1,5 @@
 # Blastkids 🚀🔑🔑🔑
 
-[![Build Status](https://travis-ci.com/DougAnderson444/blastkids.svg?branch=master)](https://travis-ci.com/DougAnderson444/blastkids)
-[![codecov](https://codecov.io/gh/DougAnderson444/blastkids/branch/master/graph/badge.svg)](https://codecov.io/gh/DougAnderson444/blastkids)
 [![Crates.io](https://img.shields.io/crates/v/blastkids.svg)](https://crates.io/crates/blastkids)
 [![Docs.rs](https://docs.rs/blastkids/badge.svg)](https://docs.rs/blastkids)
 [![dependency status](https://deps.rs/repo/github/DougAnderson444/blastkids/status.svg)](https://deps.rs/repo/github/DougAnderson444/blastkids)
@@ -28,11 +26,11 @@ See documentation on [docs.rs](https://docs.rs/blastkids).
 See tests in [`lib.rs`](./src/lib.rs) for example usage.
 
 ```rust
-use blastkids::{Manager, Seed, derive};
+use blastkids::{Manager, Zeroizing, derive};
 use blastkids::{G1, G2};
 
 // make a new manager for a G2 public key
-let seed = Seed::new([42u8; 32]);
+let seed = Zeroizing::new([42u8; 32]);
 let manager: Manager<G2> = Manager::from_seed(seed);
 
 // With a Manager you can create as many account sas you need
@@ -42,14 +40,14 @@ let account = manager.account(account_number);
 let length = 8u8; // Specify how many Child Public Keys you need (in this case, 8). Can be up to 255.
 
 // Anyone can use an Account Public Key and a `length` to derive a child account
-let child_account: Vec<G2> = derive(&account.pk, length);
+let expanded_pk: Vec<G2> = derive(&account.pk, length);
 
 // When you want to use the child account secret keys,
-// you call `sized` on the account
-let child = account.sized(length);
+// you call `expand_to` on the account
+let expanded = account.expand_to(length);
 
-// This child public keys are the same as the ones derived above
-assert_eq!(child.pk, child_account);
+// This expand public keys are the same as the ones derived above
+assert_eq!(expanded.pk, expanded_pk);
 ```
 
 ## Tests
