@@ -1,16 +1,13 @@
 #![doc = include_str!("../README.md")]
-
 pub mod kdf;
-mod seed;
 
 // re-exports
-use bls12_381_plus::group::Group;
+pub use bls12_381_plus::group::{Group, GroupEncoding};
 pub use bls12_381_plus::G1Projective as G1;
 pub use bls12_381_plus::G2Projective as G2;
 pub use bls12_381_plus::Scalar;
-use kdf::BLSCurve;
+pub use secrecy::zeroize::{Zeroize, ZeroizeOnDrop, Zeroizing};
 pub use secrecy::{ExposeSecret, Secret};
-pub use seed::Seed;
 
 use bls12_381_plus::elliptic_curve::ops::MulByGenerator;
 use thiserror::Error;
@@ -24,26 +21,26 @@ pub struct ReadmeDoctests;
 /// Generic over the type of curve used, [either G1 or G2](https://hackmd.io/@benjaminion/bls12-381#Swapping-G1-and-G2)
 ///
 /// ```rust
-/// use blastkids::{Manager, Seed};
+/// use blastkids::{Manager, Zeroizing};
 /// use bls12_381_plus::G1Projective as G1;
 /// use bls12_381_plus::G2Projective as G2;
 /// // use blastkids::{G1, G2}; <== re-exported for convenience
 ///
 /// // a G1 public key
-/// let seed = Seed::new([69u8; 32]);
+/// let seed = Zeroizing::new([69u8; 32]);
 /// let manager: Manager<G1> = Manager::from_seed(seed);
 ///
 /// // or if you like, make a new manager for a G2 public key
-/// let seed = Seed::new([42u8; 32]);
+/// let seed = Zeroizing::new([42u8; 32]);
 /// let manager: Manager<G2> = Manager::from_seed(seed);
 /// ```
 ///
-pub struct Manager<T: BLSCurve> {
+pub struct Manager<T: GroupEncoding> {
     master_sk: Scalar,
     pub master_pk: T,
 }
 
-impl<T: BLSCurve + MulByGenerator + Group<Scalar = Scalar>> Manager<T> {
+impl<T: GroupEncoding + MulByGenerator + Group<Scalar = Scalar>> Manager<T> {
     /// Create a new Manager from a master secret key
     /// and derive the master public key from it.
     fn new(master_sk: Scalar) -> Self {
@@ -54,10 +51,13 @@ impl<T: BLSCurve + MulByGenerator + Group<Scalar = Scalar>> Manager<T> {
         }
     }
 
-    /// Create a new Manager from a seed
-    pub fn from_seed(seed: Seed) -> Self {
+    /// Create a new Manager from a seed.
+    ///
+    /// The seed is used to derive the master secret key. The seed passed
+    /// must covert to bytes and [Zeroize] and [ZeroizeOnDrop] for your memory safety.
+    pub fn from_seed(seed: impl AsRef<[u8]> + Zeroize + ZeroizeOnDrop) -> Self {
         let master_sk: Scalar =
-            kdf::derive_master_sk(&seed.into_inner()).expect("Seed has length of 32 bytes");
+            kdf::derive_master_sk(seed.as_ref()).expect("Seed has length of 32 bytes");
         Self::new(master_sk)
     }
 
@@ -87,13 +87,13 @@ impl<T: BLSCurve + MulByGenerator + Group<Scalar = Scalar>> Manager<T> {
 /// An Account is a hardened key derived from the master secret key.
 ///
 /// It is generic over the type of curve used, either G1 or G2.
-pub struct Account<T: BLSCurve + MulByGenerator + Group<Scalar = Scalar>> {
+pub struct Account<T: GroupEncoding + MulByGenerator + Group<Scalar = Scalar>> {
     pub index: u32,
     sk: Secret<Scalar>,
     pub pk: T,
 }
 
-impl<T: BLSCurve + MulByGenerator + Group<Scalar = Scalar>> Account<T> {
+impl<T: GroupEncoding + MulByGenerator + Group<Scalar = Scalar>> Account<T> {
     /// Create a new account from a secret key and public key
     pub fn new(index: u32, sk: Scalar, pk: T) -> Self {
         Self {
@@ -103,10 +103,12 @@ impl<T: BLSCurve + MulByGenerator + Group<Scalar = Scalar>> Account<T> {
         }
     }
 
-    /// Given a length, use the Account's secret key to derive a sized Child Account
+    /// Expand an Account given a length, using the Account's secret key to derive the additional keys.
+    ///
+    /// Function is deterministic, and always exapands to the same keys at each index.
     ///
     /// Maximum length is 255 as there is no practical use case for keys longer than this (yet)
-    pub fn sized(&self, length: u8) -> ChildAccount<T> {
+    pub fn expand_to(&self, length: u8) -> Expanded<T> {
         let sk = Secret::new(
             (0..length)
                 .map(|i| kdf::ckd_sk_normal::<T>(self.sk.expose_secret(), i as u32))
@@ -115,21 +117,24 @@ impl<T: BLSCurve + MulByGenerator + Group<Scalar = Scalar>> Account<T> {
 
         // Iterate over the secret keys and derive the corresponding public keys
         let pk = derive(&self.pk, length);
-        ChildAccount { sk, pk }
+        Expanded { sk, pk }
     }
 }
 
 /// When an Account uses a length to derive a Child Account,
 /// this struct is returned. It contains both Public Key and Secret Key
 /// in vectors.
-pub struct ChildAccount<T: BLSCurve + MulByGenerator + Group<Scalar = Scalar>> {
+pub struct Expanded<T: GroupEncoding + MulByGenerator + Group<Scalar = Scalar>> {
     pub sk: Secret<Vec<Scalar>>,
     pub pk: Vec<T>,
 }
 
 /// Given an Account root Public Key and a length,
 /// derive the child account public keys
-pub fn derive<T: BLSCurve + Group<Scalar = Scalar> + MulByGenerator>(pk: &T, length: u8) -> Vec<T> {
+pub fn derive<T: GroupEncoding + Group<Scalar = Scalar> + MulByGenerator>(
+    pk: &T,
+    length: u8,
+) -> Vec<T> {
     (0..length)
         .map(|i| kdf::ckd_pk_normal::<T>(pk, i as u32))
         .collect::<Vec<T>>()
@@ -138,20 +143,22 @@ pub fn derive<T: BLSCurve + Group<Scalar = Scalar> + MulByGenerator>(pk: &T, len
 #[cfg(test)]
 mod basic_test {
 
+    use secrecy::zeroize::Zeroizing;
+
     use super::*;
 
     #[test]
     fn smoke() {
-        let seed = Seed::new([69u8; 32]);
+        let seed = Zeroizing::new([69u8; 32]);
         let manager: Manager<G2> = Manager::from_seed(seed);
         let pk2 = G2::mul_by_generator(&manager.master_sk);
         assert_eq!(manager.master_pk, pk2);
 
         println!(
             "master_pk [{}]: compressed: [{:?}]",
-            // print master_pk as BLSCurve to use serialize_uncompressed
-            manager.master_pk.serialize_compressed().len(),
-            manager.master_pk.serialize_compressed().len()
+            // print master_pk as GroupEncoding to use serialize_uncompressed
+            manager.master_pk.to_bytes().as_ref().len(),
+            manager.master_pk.to_bytes().as_ref().len()
         );
 
         println!("master_sk [{}]", manager.master_sk);
@@ -161,7 +168,7 @@ mod basic_test {
         // a user derived account #2 matches the issuer derived account #2
         let account = manager.account(purpose);
         // derived second floor from floor_account_pk
-        let child = account.sized(length);
+        let child = account.expand_to(length);
 
         // should match the issuer derived account #2 from secret keys
         let hardened_child_sk = kdf::ckd_sk_hardened(&manager.master_sk, purpose);

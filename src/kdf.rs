@@ -11,22 +11,17 @@
 use super::*;
 
 // re-exports
+pub use bls12_381_plus::group::{Group, GroupEncoding};
 pub use bls12_381_plus::G1Projective as G1;
 pub use bls12_381_plus::G2Projective as G2;
 pub use bls12_381_plus::Scalar;
 
 // use bigint::prelude::*;
 use bls12_381_plus::elliptic_curve::{
-    bigint::{
-        self,
-        consts::{U48, U96},
-        generic_array::{typenum::Unsigned, ArrayLength, GenericArray},
-        prelude::Encoding,
-    },
+    bigint::{self, prelude::Encoding},
     ops::MulByGenerator,
 };
 use bls12_381_plus::ff::Field; // so we can use is_zero()
-use bls12_381_plus::group::{Curve, Group};
 use hkdf::Hkdf;
 use sha2::{Digest, Sha256};
 use std::convert::*;
@@ -40,50 +35,6 @@ pub enum BlastKidsError {
     /// Seed too small from kdf module
     #[error("Seed too small")]
     SeedTooSmall,
-}
-
-/// Trait for serializing a point to compressed form
-pub trait BLSCurve {
-    type CompressedPointLength: ArrayLength<u8> + Unsigned;
-    // type UncompressedPointLength: ArrayLength<u8> + Unsigned;
-    fn serialize_compressed(&self) -> GenericArray<u8, Self::CompressedPointLength>;
-    // fn serialize_uncompressed(&self) -> GenericArray<u8, Self::UncompressedPointLength>;
-}
-
-/// Implement BLSCurve for G1
-impl BLSCurve for G1 {
-    // length is 48
-    type CompressedPointLength = U48;
-    // type UncompressedPointLength = U96;
-
-    /// Serialize a G1 point to compressed form
-    fn serialize_compressed(&self) -> GenericArray<u8, Self::CompressedPointLength> {
-        self.to_affine().to_compressed().into()
-    }
-
-    // /// Serialize a G1 point to uncompressed form
-    // fn serialize_uncompressed(&self) -> GenericArray<u8, Self::UncompressedPointLength> {
-    //     self.to_affine().to_uncompressed().into()
-    // }
-}
-
-/// Implement BLSCurve for G2
-impl BLSCurve for G2 {
-    type CompressedPointLength = U96;
-    // type UncompressedPointLength = bigint::U256;
-    /// Serialize a G2 point to compressed form
-    fn serialize_compressed(&self) -> GenericArray<u8, Self::CompressedPointLength> {
-        // create a GenericArray of length 96 and return it
-        // self.to_compressed()
-        let mut ret = GenericArray::default();
-        ret.copy_from_slice(&self.to_affine().to_compressed());
-        ret
-    }
-
-    // / Serialize a G2 point to uncompressed form
-    // fn serialize_uncompressed(&self) -> GenericArray<u8, Self::UncompressedPointLength> {
-    //     self.to_affine().to_uncompressed().into()
-    // }
 }
 
 /// Derive master private key from a seed
@@ -195,7 +146,7 @@ pub fn path_to_node(path_str: &str) -> Result<Vec<u32>, String> {
 /// Private -> Private non-hardened child key derivation
 pub fn ckd_sk_normal<T>(parent_sk: &Scalar, index: u32) -> Scalar
 where
-    T: BLSCurve + Group<Scalar = Scalar> + MulByGenerator,
+    T: GroupEncoding + Group<Scalar = Scalar> + MulByGenerator,
 {
     let parent_pk: T = T::mul_by_generator(parent_sk);
     let tweak = ckd_tweak_normal(&parent_pk, index);
@@ -205,19 +156,18 @@ where
 /// Compute the scalar tweak added to this key to get a child key
 pub fn ckd_tweak_normal<T>(parent_pk: &T, index: u32) -> Scalar
 where
-    T: BLSCurve,
+    T: GroupEncoding,
 {
     let salt = index.to_be_bytes();
-    let binding = parent_pk.serialize_compressed();
-    let ikm = binding.as_slice();
-    let combined = [ikm, &salt[..]].concat();
+    let ikm = parent_pk.to_bytes();
+    let combined = [ikm.as_ref(), &salt[..]].concat();
     let digest = Sha256::digest(combined);
     let big_digest = bigint::U256::from_be_bytes(digest.into());
     Scalar::from_raw(big_digest.into()) //
 }
 
 /// Public -> Public non-hardened child key derivation
-pub fn ckd_pk_normal<T: BLSCurve + Group<Scalar = Scalar> + MulByGenerator>(
+pub fn ckd_pk_normal<T: GroupEncoding + Group<Scalar = Scalar> + MulByGenerator>(
     parent_pk: &T,
     index: u32,
 ) -> T {
@@ -226,7 +176,7 @@ pub fn ckd_pk_normal<T: BLSCurve + Group<Scalar = Scalar> + MulByGenerator>(
 }
 
 /// Private -> Private non-hardened child key derivation from a path
-pub fn derive_child_sk_normal<T: BLSCurve + Group<Scalar = Scalar> + MulByGenerator>(
+pub fn derive_child_sk_normal<T: GroupEncoding + Group<Scalar = Scalar> + MulByGenerator>(
     parent_sk: Scalar,
     path_str: &str,
 ) -> Scalar {
@@ -239,7 +189,7 @@ pub fn derive_child_sk_normal<T: BLSCurve + Group<Scalar = Scalar> + MulByGenera
 }
 
 /// Public -> Public non-hardened child key derivation from a path
-pub fn derive_child_pk_normal<T: BLSCurve + Group<Scalar = Scalar> + MulByGenerator>(
+pub fn derive_child_pk_normal<T: GroupEncoding + Group<Scalar = Scalar> + MulByGenerator>(
     parent_pk: T,
     path_str: &str,
 ) -> T {
@@ -352,8 +302,8 @@ mod test {
         assert_eq!(derived_child_pk, G2::mul_by_generator(&derived_child_sk));
         println!(
             "child pk  [{}] {:?}",
-            derived_child_pk.serialize_compressed().len(),
-            derived_child_pk.serialize_compressed(),
+            derived_child_pk.to_bytes().as_ref().len(),
+            derived_child_pk.to_bytes(),
         );
         let derived_grandchild_sk: Scalar = ckd_sk_normal::<G2>(&derived_child_sk, 12142u32);
         let derived_grandchild_pk: G2 = ckd_pk_normal(&derived_child_pk, 12142u32);
