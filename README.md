@@ -39,7 +39,7 @@ let account = manager.account(account_number);
 
 let length = 8u8; // Specify how many Child Public Keys you need (in this case, 8). Can be up to 255.
 
-// Anyone can use an Account Public Key and a `length` to derive a child account
+// Anyone can use an Account Public Key and a `length` to derive an expanded account
 let expanded_pk: Vec<G2> = derive(&account.pk, length);
 
 // When you want to use the child account secret keys,
