@@ -21,3 +21,6 @@ secrecy = { version = "0.8.0" }
 
 [dev-dependencies]
 hex = "0.4.3"
+
+[patch.crates-io]
+bls12_381_plus = { git = "https://github.com/DougAnderson444/bls12_381_plus", branch = "wasm" } 
