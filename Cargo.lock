@@ -50,7 +50,7 @@ dependencies = [
 [[package]]
 name = "bls12_381_plus"
 version = "0.8.13"
-source = "git+https://github.com/mikelodder7/bls12_381_plus.git#91a399e9a5f326816f13a0feab898ff40a7a1599"
+source = "git+https://github.com/mikelodder7/bls12_381_plus.git?rev=91a399e9a5f326816f13a0feab898ff40a7a1599#91a399e9a5f326816f13a0feab898ff40a7a1599"
 dependencies = [
  "arrayref",
  "elliptic-curve",
