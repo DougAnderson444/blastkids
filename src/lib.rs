@@ -2,6 +2,7 @@
 pub mod kdf;
 
 // re-exports
+pub use bls12_381_plus::elliptic_curve::ops::MulByGenerator;
 pub use bls12_381_plus::group::{Group, GroupEncoding};
 pub use bls12_381_plus::G1Projective as G1;
 pub use bls12_381_plus::G2Projective as G2;
@@ -9,7 +10,6 @@ pub use bls12_381_plus::Scalar;
 pub use secrecy::zeroize::{Zeroize, ZeroizeOnDrop, Zeroizing};
 pub use secrecy::{ExposeSecret, Secret};
 
-use bls12_381_plus::elliptic_curve::ops::MulByGenerator;
 use thiserror::Error;
 
 // Test the README.md code snippets
