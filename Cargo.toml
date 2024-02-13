@@ -1,6 +1,6 @@
 [package]
 name = "blastkids"
-version = "0.1.4"
+version = "0.1.5"
 edition = "2021"
 license = "MIT"
 description = "Derive BLS12-381 child keys using Blastkids."
@@ -13,7 +13,7 @@ categories = ["cryptography"]
 authors = ["Doug Anderson <DougAnderson444@peerpiper.io>"]
 
 [dependencies]
-bls12_381_plus = { git= "https://github.com/mikelodder7/bls12_381_plus.git", features = ["expose-fields", "alloc"] }
+bls12_381_plus = { version = "0.8.13", git= "https://github.com/mikelodder7/bls12_381_plus.git", features = ["expose-fields", "alloc"] }
 hkdf = "0.12.3"
 sha2 = "0.10.7"
 thiserror = "1.0.48"
