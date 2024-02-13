@@ -13,7 +13,7 @@ categories = ["cryptography"]
 authors = ["Doug Anderson <DougAnderson444@peerpiper.io>"]
 
 [dependencies]
-bls12_381_plus = "0.8.5"
+bls12_381_plus = { git= "https://github.com/mikelodder7/bls12_381_plus.git", features = ["expose-fields", "alloc"] }
 hkdf = "0.12.3"
 sha2 = "0.10.7"
 thiserror = "1.0.48"
@@ -21,6 +21,3 @@ secrecy = { version = "0.8.0" }
 
 [dev-dependencies]
 hex = "0.4.3"
-
-[patch.crates-io]
-bls12_381_plus = { git = "https://github.com/DougAnderson444/bls12_381_plus", branch = "wasm" } 
