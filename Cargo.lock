@@ -164,7 +164,7 @@ dependencies = [
 
 [[package]]
 name = "blastkids"
-version = "0.1.7"
+version = "0.2.0"
 dependencies = [
  "bls12_381_plus",
  "hex",
